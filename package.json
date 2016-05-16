@@ -1,0 +1,17 @@
+{
+  "name": "ausvoteflow",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": "6.1.0"
+  },
+  "dependencies": {
+    "express": "4.13.4"
+  },
+  "devDependencies": {
+    "eslint": "2.10.0"
+  }
+}
