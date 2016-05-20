@@ -1,0 +1,55 @@
+body {
+    background-color: #F5F5ED;
+    font-family: "Open Sans", sans-serif;
+    line-height: 1.5;
+    margin: 0;
+}
+header {
+    background-color: #CF8E23;
+    color: white;
+    font-size: 1.25rem;
+    height: 3rem;
+    line-height: 3rem;
+}
+header a {
+    color: inherit;
+}
+nav, .main {
+    margin: 0 auto;
+    width: 60rem;
+}
+.main {
+    padding-top: 1em;
+}
+h1 {
+    font-size: 1.25rem;
+}
+h1 small {
+    font-size: 1rem;
+    font-style: italic;
+    font-weight: normal;
+    padding-left: 1em;
+}
+
+/* TEMP */
+nav ul {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    justify-content: space-around;
+}
+nav li {
+    display: block;
+    flex: auto 1 0;
+    list-style: none;
+}
+nav a {
+    display: block;
+    padding: 0 1em;
+    text-align: center;
+    text-decoration: none;
+}
+nav a:hover {
+    background-color: rgba(0,0,0,0.1);
+}
+/* END TEMP */

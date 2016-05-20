@@ -1,10 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf8">
     <title>{{title}}</title>
+    <link rel="stylesheet" href="/frontbench/base.css">
 </head>
 <body>
-    <h1>Layout</h1>
+    <header>
+        <nav>
+            <!-- FULL NAV
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/how-it-works">How it works</a>
+                    <ul>
+                        <li><a href="/how-it-works/house-of-reps">House of Representatives</a></li>
+                        <li><a href="/how-it-works/senate">Senate</a></li>
+                        <li><a href="/how-it-works/prime-minister">Prime Minister</a></li>
+                    </ul>
+                </li>
+                <li><a href="/results">Results</a></li>
+            </ul>
+            -- END FULL NAV -->
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/how-it-works/house-of-reps">House of Representatives</a></li>
+                <li><a href="/how-it-works/senate">Senate</a></li>
+                <li><a href="/how-it-works/prime-minister">Prime Minister</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="main" role="main">
     {{{body}}}
+    </div>
 </body>
 </html>
