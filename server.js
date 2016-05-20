@@ -8,32 +8,35 @@ app.set('view engine', 'hbs');
 
 app.use('/frontbench', express.static(path.join(__dirname, 'frontbench')));
 
-function dumbRender(req, res) {
-    var path = req.path.substr(1);
-    res.render(path);
+function dumbRenderer(data) {
+    return function (req, res) {
+        var path = req.path.substr(1);
+        res.render(path, data);
+    };
 }
 
 function setupDumbPaths(paths, prefix = '') {
-    var prevPath = prefix;
-    paths.forEach(function (path) {
-        if (Array.isArray(path)) {
-            setupDumbPaths(path, prevPath);
-        } else {
-            let fullPath = prefix + '/' + path;
-            app.get(fullPath, dumbRender);
-            prevPath = fullPath;
+    Object.keys(paths).forEach(function (path) {
+        let details = paths[path];
+        let fullPath = prefix + '/' + path;
+        let data = {
+            scripts: (details.scripts || []).map(s => '/frontbench/' + s)
+        };
+        app.get(fullPath, dumbRenderer(data));
+        if (details.children) {
+            setupDumbPaths(details.children, fullPath);
         }
     });
 }
 
-setupDumbPaths([
-    '',
-    'how-it-works', [
-        'house-of-reps',
-        'senate',
-        'prime-minister',
-    ],
-    'results'
-]);
+setupDumbPaths({
+    '': {},
+    'how-it-works': {children: {
+        'house-of-reps': {scripts: ['hordop.js']},
+        'senate': {},
+        'prime-minister': {},
+    }},
+    'results': {}
+});
 
 app.listen(parseInt(process.env.PORT || 9876, 10));
