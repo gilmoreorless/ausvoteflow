@@ -20,7 +20,8 @@ function setupDumbPaths(paths, prefix = '') {
         let details = paths[path];
         let fullPath = prefix + '/' + path;
         let data = {
-            scripts: (details.scripts || []).map(s => '/frontbench/' + s)
+            title: details.title || '',
+            scripts: (details.scripts || []).map(s => '/frontbench/' + s),
         };
         app.get(fullPath, dumbRenderer(data));
         if (details.children) {
@@ -31,11 +32,21 @@ function setupDumbPaths(paths, prefix = '') {
 
 setupDumbPaths({
     '': {},
-    'how-it-works': {children: {
-        'house-of-reps': {scripts: ['hordop.js']},
-        'senate': {},
-        'prime-minister': {},
-    }},
+    'how-it-works': {
+        title: 'How it works',
+        children: {
+            'house-of-reps': {
+                title: 'House of Representatives',
+                scripts: ['hor-ballot.js', 'hor-dop.js', 'hor-controller.js'],
+            },
+            'senate': {
+                title: 'Senate',
+            },
+            'prime-minister': {
+                title: 'Prime Minister',
+            },
+        }
+    },
     'results': {}
 });
 
