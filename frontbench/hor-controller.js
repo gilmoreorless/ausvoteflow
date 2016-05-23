@@ -1,4 +1,4 @@
-(function () {
+(function (exports) {
 
     var candidates = [
         {name: 'Scarlet PIMPERNEL', party: 'Reds'},
@@ -12,5 +12,7 @@
         .candidates(candidates);
 
     ballot.render();
+
+    exports.ballot = ballot;
 
 })(this);

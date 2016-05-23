@@ -8,11 +8,14 @@
             candidates = [],
             container,
             // Internal references
+            hasRendered = false,
             root, candidateNodes;
 
-        const FONT_SIZE = 16,
-            LINE_HEIGHT = FONT_SIZE * 1.5,
-            UNSTYLED_CANDIDATE_MARGIN = FONT_SIZE / 2;
+        const FontSize = 20,
+            LineHeight = FontSize * 1.5,
+            UnstyledCandidateMargin = FontSize / 2,
+            StyledCandidateMargin = LineHeight,
+            VoteBoxWidth = FontSize * 2;
 
         bal.container = function (elem) {
             if (!arguments.length) return container;
@@ -20,7 +23,13 @@
             root = d3.select(elem)
                 .append('svg')
                 .attr('class', 'hor-ballot')
-                .attr('height', 300)
+                .attr('width', '100%')
+                .attr('height', 500)
+            let style = d3.select('#hor-style');
+            if (!style.size()) {
+                style = root.append('style').attr('id', 'hor-style');
+            }
+            style.text(`.hor-candidate { font-size: ${FontSize}px; }`)
             return bal;
         }
 
@@ -38,7 +47,7 @@
 
         function setupNodes() {
             candidateNodes = root.selectAll('.hor-candidate')
-                .data(candidates);
+                .data(candidates, d => d.name);
             let groups = candidateNodes.enter().append('g')
                 .attr('class', 'hor-candidate')
             groups.append('text')
@@ -47,19 +56,60 @@
             groups.append('text')
                 .text(d => d.party)
                 .attr('dy', '0.4em')
-                .attr('y', LINE_HEIGHT);
-            candidateNodes.style('opacity', 0);
+                .attr('y', LineHeight);
         }
 
-        bal.render = function () {
-            setupNodes();
+        function positionUnstyled() {
+            this.translate(0, (d, i) =>
+                LineHeight / 2 + (i * LineHeight * 2) + (i * UnstyledCandidateMargin));
+        }
+
+        function positionStyled() {
+            this.translate(VoteBoxWidth + FontSize, (d, i) =>
+                LineHeight + (i * LineHeight * 2) + (i * StyledCandidateMargin));
+        }
+
+        function fadeIn() {
             candidateNodes
-                .translate(0, (d, i) => LINE_HEIGHT / 2 + (i * LINE_HEIGHT * 2) + (i * UNSTYLED_CANDIDATE_MARGIN))
+                .call(positionUnstyled)
+                .style('opacity', 0)
             .transition()
                 .duration(1000)
                 .delay((d, i) => i * 300)
                 .style('opacity', 1);
+        }
+
+        function renderUnstyled() {
+            if (!hasRendered) {
+                return fadeIn();
+            }
+            candidateNodes.transition()
+                .duration(1000)
+                .call(positionUnstyled)
+        }
+
+        function renderStyled() {
+            candidateNodes
+                .transition()
+                .duration(700)
+                .call(positionStyled)
+        }
+
+        bal.render = function () {
+            setupNodes();
+            if (mode === ballot.MODE_UNSTYLED) {
+                renderUnstyled();
+            }
+            if (mode === ballot.MODE_STYLED) {
+                renderStyled();
+            }
+            hasRendered = true;
             return bal;
+        }
+
+        bal.randomise = function () {
+            d3.shuffle(candidates);
+            return bal.render();
         }
 
         return bal;

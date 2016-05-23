@@ -12,7 +12,8 @@
         }
     };
 
-    d3.selection.prototype.translate = function (x, y) {
+    d3.selection.prototype.translate =
+    d3.transition.prototype.translate = function (x, y) {
         x = d3.functor(x);
         y = d3.functor(y);
         return this.attr('transform', (...args) => `translate(${x(...args)}, ${y(...args)})`);

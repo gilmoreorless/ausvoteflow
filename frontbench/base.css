@@ -16,7 +16,8 @@ header a {
 }
 nav, .main {
     margin: 0 auto;
-    width: 60rem;
+    max-width: 60rem;
+    padding: 0 1rem;
 }
 .main {
     padding-top: 1em;
