@@ -1,15 +1,47 @@
 /* global utils, d3 */
 (function (exports) {
 
+    /**
+     * TODO: Switch to a D3-style chained API for everything. Get rid of "modes".
+     */
+    /*** EXAMPLE ***\/
+    ballot.container('#example')
+       // First state
+       .candidates(['A','B','C','D'])
+       .withCard(false)
+       .fadeIn()
+       .render()
+       // Randomise candidate order
+       .randomise().render()
+       // Show ballot card
+       .withCard(true).render()
+       // Vote for candidates, fill slowly
+       .vote([4,1,3,2]).delay(500).render()
+       // Invalid card (votes missing)
+       .vote([0,1,0,0]).delay(0).render()
+       // Invalid card (not 1-4), fill quickly
+       .vote([5,1,3,2]).delay(100).render()
+       // "How to vote card"
+       .attr('class', 'how-to-vote')
+       .title('How to vote for Best Party')
+       .highlight('C')
+       .vote([4,2,1,3]).render()
+    /*** END EXAMPLE ***/
+
+    // TODO: Should .render() return a Promise?
+
     function ballot() {
         var bal = {},
             // Settable options
-            mode = ballot.MODE_UNSTYLED,
-            candidates = [],
             container,
+            candidates = [],
+            votes = [],
+            withCard = false,
+            shouldFadeIn = false,
+            transitionDelay = 0,
+            transitionDuration = 0,
             // Internal references
-            hasRendered = false,
-            root, candidateNodes;
+            root, candidateNodes, voteBoxes, highlight;
 
         const FontSize = 20,
             LineHeight = FontSize * 1.5,
@@ -17,10 +49,12 @@
             StyledCandidateMargin = LineHeight,
             VoteBoxWidth = FontSize * 2;
 
+        /// GETTER / SETTER METHODS
+
         bal.container = function (elem) {
             if (!arguments.length) return container;
-            container = elem;
-            root = d3.select(elem)
+            container = d3.select(elem);
+            root = container
                 .append('svg')
                 .attr('class', 'hor-ballot')
                 .attr('width', '100%')
@@ -33,16 +67,64 @@
             return bal;
         }
 
-        bal.mode = function (m) {
-            if (!arguments.length) return mode;
-            mode = m;
-            return bal;
-        }
-
         bal.candidates = function (c) {
             if (!arguments.length) return candidates;
             candidates = Array.from(c);
             return bal;
+        }
+
+        bal.votes = function (v) {
+            if (!arguments.length) return votes;
+            votes = Array.from(v);
+            return bal;
+        }
+
+        bal.withCard = function (c) {
+            if (!arguments.length) return withCard;
+            withCard = !!c;
+            return bal;
+        }
+
+        bal.delay = function (d) {
+            if (!arguments.length) return transitionDelay;
+            transitionDelay = +d || 0;
+            return bal;
+        }
+
+        bal.duration = function (d) {
+            if (!arguments.length) return transitionDuration;
+            transitionDuration = +d || 0;
+            return bal;
+        }
+
+        bal.attr = function (k, v) {
+            if (arguments.length < 2) {
+                return root ? root.attr(k) : undefined;
+            }
+            if (root) {
+                root.attr(k, v);
+            }
+            return bal;
+        }
+
+        bal.title = function (t) {
+            // TODO: Get/set visible title of ballot paper, like "How to vote for Party ABC"
+        }
+
+        /// WRITE-ONLY METHODS
+
+        bal.randomise = function () {
+            d3.shuffle(candidates);
+            return bal;
+        }
+
+        bal.fadeIn = function () {
+            shouldFadeIn = true;
+            return bal;
+        }
+
+        bal.highlight = function () {
+            // TODO
         }
 
         function setupNodes() {
@@ -59,64 +141,44 @@
                 .attr('y', LineHeight);
         }
 
-        function positionUnstyled() {
+        function positionNoCard() {
             this.translate(0, (d, i) =>
                 LineHeight / 2 + (i * LineHeight * 2) + (i * UnstyledCandidateMargin));
         }
 
-        function positionStyled() {
+        function positionWithCard() {
             this.translate(VoteBoxWidth + FontSize, (d, i) =>
                 LineHeight + (i * LineHeight * 2) + (i * StyledCandidateMargin));
         }
 
-        function fadeIn() {
-            candidateNodes
-                .call(positionUnstyled)
-                .style('opacity', 0)
-            .transition()
-                .duration(1000)
-                .delay((d, i) => i * 300)
-                .style('opacity', 1);
-        }
-
-        function renderUnstyled() {
-            if (!hasRendered) {
-                return fadeIn();
-            }
-            candidateNodes.transition()
-                .duration(1000)
-                .call(positionUnstyled)
-        }
-
-        function renderStyled() {
-            candidateNodes
-                .transition()
-                .duration(700)
-                .call(positionStyled)
-        }
-
         bal.render = function () {
             setupNodes();
-            if (mode === ballot.MODE_UNSTYLED) {
-                renderUnstyled();
-            }
-            if (mode === ballot.MODE_STYLED) {
-                renderStyled();
-            }
-            hasRendered = true;
-            return bal;
-        }
+            let nodes = candidateNodes;
+            let positionFn = withCard ? positionWithCard : positionNoCard;
 
-        bal.randomise = function () {
-            d3.shuffle(candidates);
-            return bal.render();
+            if (shouldFadeIn) {
+                nodes.style('opacity', 0)
+                    .call(positionFn);
+            }
+
+            nodes = nodes.transition()
+                .duration(transitionDuration)
+            if (transitionDelay) {
+                nodes.delay((d, i) => i * transitionDelay);
+            }
+
+            if (shouldFadeIn) {
+                nodes.style('opacity', 1);
+                shouldFadeIn = false;
+            } else {
+                nodes.call(positionFn);
+            }
+
+            return bal;
         }
 
         return bal;
     }
-
-    ballot.MODE_UNSTYLED = 'unstyled';
-    ballot.MODE_STYLED = 'styled';
 
     exports.horBallot = ballot;
 

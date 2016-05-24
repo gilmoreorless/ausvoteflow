@@ -8,10 +8,13 @@
     ];
 
     var ballot = horBallot()
-        .container('#hor-example')
-        .candidates(candidates);
+        .container('#hor-example');
 
-    ballot.render();
+    ballot.candidates(candidates)
+        .fadeIn()
+        .duration(1000)
+        .delay(100)
+        .render()
 
     exports.ballot = ballot;
 
