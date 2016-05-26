@@ -54,3 +54,21 @@ nav a:hover {
     background-color: rgba(0,0,0,0.1);
 }
 /* END TEMP */
+
+
+/*** House of Reps: Ballot card ***/
+
+.hor-ballot-border {
+    fill: none;
+    stroke: #000;
+    stroke-width: 2;
+}
+.hor-vote-box-border {
+    fill: none;
+    stroke: #000;
+    stroke-width: 2;
+}
+.hor-vote-box-text {
+    font-size: 30px;
+    font-family: fantasy, cursive;
+}

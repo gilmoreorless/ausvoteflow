@@ -9,6 +9,10 @@
                 return document.querySelector(elem);
             }
             return document;
+        },
+
+        clamp(num, min, max) {
+            return Math.min(Math.max(num, min), max);
         }
     };
 
