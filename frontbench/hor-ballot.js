@@ -9,14 +9,17 @@
        // First state
        .candidates(['A','B','C','D'])
        .withCard(false)
-       .fadeIn()
+       .fadeInCandidates()
+       .duration(1000)
        .render()
        // Randomise candidate order
        .randomise().render()
+       // Re-position candidates for the ballot card
+       .withCard(true).showCard(false).render()
        // Show ballot card
-       .withCard(true).render()
+       .showCard(true).fadeInCard().render()
        // Vote for candidates, fill slowly
-       .vote([4,1,3,2]).delay(500).render()
+       .vote([4,1,3,2]).fadeInVotes().delay(500).render()
        // Invalid card (votes missing)
        .vote([0,1,0,0]).delay(0).render()
        // Invalid card (not 1-4), fill quickly
@@ -37,7 +40,12 @@
             candidates = [],
             votes = [],
             withCard = false,
-            shouldFadeIn = false,
+            showCard = false,
+            shouldFadeIn = {
+                candidates: false,
+                card: false,
+                votes: false,
+            },
             transitionDelay = 0,
             transitionDuration = 0,
             // Internal references
@@ -74,7 +82,6 @@
                 let [parent, prop, cssClass] = defs;
                 nodes[prop] = nodes[parent].append('g').attr('class', cssClass);
             });
-            // nodes.cardRoot.style('opacity', 0);
             nodes.cardBorder = nodes.cardRoot.append('rect')
                 .attr('class', 'hor-ballot-border')
                 .attr('x', 0)
@@ -100,6 +107,18 @@
         bal.withCard = function (c) {
             if (!arguments.length) return withCard;
             withCard = !!c;
+            if (!withCard) {
+                showCard = false;
+            }
+            return bal;
+        }
+
+        bal.showCard = function (c) {
+            if (!arguments.length) return showCard;
+            showCard = !!c;
+            if (showCard) {
+                withCard = true;
+            }
             return bal;
         }
 
@@ -146,10 +165,13 @@
             return bal;
         }
 
-        bal.fadeIn = function () {
-            shouldFadeIn = true;
-            return bal;
-        }
+        Object.keys(shouldFadeIn).forEach(prop => {
+            let fn = 'fadeIn' + prop[0].toUpperCase() + prop.substr(1);
+            bal[fn] = function () {
+                shouldFadeIn[prop] = true;
+                return bal;
+            }
+        });
 
         bal.highlight = function () {
             // TODO
@@ -238,33 +260,52 @@
         bal.render = function () {
             setupNodes();
             let cands = nodes.candidates;
+            let card = nodes.cardRoot;
             let positionFn = withCard ? positionWithCard : positionNoCard;
 
-            if (shouldFadeIn) {
-                cands.style('opacity', 0)
-                    .call(positionFn);
+            function doStuff() {
+                // Prepare positions/opacity for anything that needs fading in
+                if (shouldFadeIn.candidates) {
+                    cands.style('opacity', 0)
+                        .call(positionFn);
+                }
+                if (shouldFadeIn.card) {
+                    card.style('opacity', 0);
+                    card = card.transition();
+                }
+                // TODO shouldFadeIn.votes
+
+                // Add any per-element delays
+                cands = cands.transition()
+                if (transitionDelay) {
+                    cands.delay((d, i) => i * transitionDelay);
+                }
+
+                // Show/move candidates
+                if (shouldFadeIn.candidates) {
+                    cands.style('opacity', 1);
+                } else {
+                    cands.call(positionFn);
+                }
+
+                // TODO: FIX UP VOTES
+                if (withCard) {
+                    nodes.voteBoxes
+                        .call(positionVoteBox)
+                    .select('.hor-vote-box-text')
+                        .text(d => d ? d : '')
+                }
+
+                // Show/hide voting card as required
+                card.style('opacity', +showCard);
+
+                // Clean up fade trackers
+                Object.keys(shouldFadeIn).forEach(prop => shouldFadeIn[prop] = false);
             }
 
-            cands = cands.transition()
+            d3.transition()
                 .duration(transitionDuration)
-            if (transitionDelay) {
-                cands.delay((d, i) => i * transitionDelay);
-            }
-
-            if (shouldFadeIn) {
-                cands.style('opacity', 1);
-                shouldFadeIn = false;
-            } else {
-                cands.call(positionFn);
-            }
-
-            if (withCard) {
-                nodes.voteBoxes
-                    .call(positionVoteBox)
-                .select('.hor-vote-box-text')
-                    .text(d => d ? d : '')
-            }
-            nodes.cardRoot.style('opacity', +withCard);
+                .each(doStuff);
 
             return bal;
         }
