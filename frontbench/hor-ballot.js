@@ -261,6 +261,7 @@
             setupNodes();
             let cands = nodes.candidates;
             let card = nodes.cardRoot;
+            let voteText = nodes.voteBoxes.select('.hor-vote-box-text');
             let positionFn = withCard ? positionWithCard : positionNoCard;
 
             function doStuff() {
@@ -273,12 +274,17 @@
                     card.style('opacity', 0);
                     card = card.transition();
                 }
-                // TODO shouldFadeIn.votes
+                if (shouldFadeIn.votes) {
+                    voteText.style('opacity', 0);
+                }
+                nodes.voteBoxes.call(positionVoteBox);
 
                 // Add any per-element delays
-                cands = cands.transition()
+                cands = cands.transition();
+                voteText = voteText.transition();
                 if (transitionDelay) {
                     cands.delay((d, i) => i * transitionDelay);
+                    voteText.delay(d => d * transitionDelay);
                 }
 
                 // Show/move candidates
@@ -288,15 +294,15 @@
                     cands.call(positionFn);
                 }
 
-                // TODO: FIX UP VOTES
-                if (withCard) {
-                    nodes.voteBoxes
-                        .call(positionVoteBox)
-                    .select('.hor-vote-box-text')
-                        .text(d => d ? d : '')
+                // Show votes
+                if (showCard) {
+                    voteText.text(d => d ? d : '')
+                    if (shouldFadeIn.votes) {
+                        voteText.style('opacity', 1);
+                    }
                 }
 
-                // Show/hide voting card as required
+                // Show/hide voting card and votes as required
                 card.style('opacity', +showCard);
 
                 // Clean up fade trackers
