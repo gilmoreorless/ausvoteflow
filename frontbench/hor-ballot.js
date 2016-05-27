@@ -5,33 +5,31 @@
      * TODO: Switch to a D3-style chained API for everything. Get rid of "modes".
      */
     /*** EXAMPLE ***\/
-    ballot.container('#example')
-       // First state
-       .candidates(['A','B','C','D'])
-       .withCard(false)
-       .fadeInCandidates()
-       .duration(1000)
-       .render()
-       // Randomise candidate order
-       .randomise().render()
-       // Re-position candidates for the ballot card
-       .withCard(true).showCard(false).render()
-       // Show ballot card
-       .showCard(true).fadeInCard().render()
-       // Vote for candidates, fill slowly
-       .vote([4,1,3,2]).fadeInVotes().delay(500).render()
-       // Invalid card (votes missing)
-       .vote([0,1,0,0]).delay(0).render()
-       // Invalid card (not 1-4), fill quickly
-       .vote([5,1,3,2]).delay(100).render()
-       // "How to vote card"
-       .attr('class', 'how-to-vote')
-       .title('How to vote for Best Party')
-       .highlight('C')
-       .vote([4,2,1,3]).render()
+    let card = ballot.container('#example')
+      // First state
+    card.candidates(['A','B','C','D'])
+        .withCard(false)
+        .fadeInCandidates()
+        .duration(1000)
+        .render()
+      // Randomise candidate order
+    card.randomise().render()
+      // Re-position candidates for the ballot card
+    card.withCard(true).showCard(false).render()
+      // Show ballot card
+    card.showCard(true).fadeInCard().render()
+      // Vote for candidates, fill slowly
+    card.vote([4,1,3,2]).fadeInVotes().delay(500).render()
+      // Invalid card (votes missing)
+    card.vote([0,1,0,0]).delay(0).render()
+      // Invalid card (not 1-4), fill quickly
+    card.vote([5,1,3,2]).delay(100).render()
+      // "How to vote card"
+    card.attr('class', 'how-to-vote')
+        .title('How to vote for Best Party')
+        .highlight('C')
+        .vote([4,2,1,3]).render()
     /*** END EXAMPLE ***/
-
-    // TODO: Should .render() return a Promise?
 
     function ballot() {
         var bal = {},
@@ -284,7 +282,7 @@
                 voteText = voteText.transition();
                 if (transitionDelay) {
                     cands.delay((d, i) => i * transitionDelay);
-                    voteText.delay(d => d * transitionDelay);
+                    voteText.delay(d => (d - 1) * transitionDelay);
                 }
 
                 // Show/move candidates
@@ -309,11 +307,12 @@
                 Object.keys(shouldFadeIn).forEach(prop => shouldFadeIn[prop] = false);
             }
 
-            d3.transition()
-                .duration(transitionDuration)
-                .each(doStuff);
-
-            return bal;
+            return new Promise(function (resolve) {
+                d3.transition()
+                    .duration(transitionDuration)
+                    .each('end', resolve)
+                    .each(doStuff);
+            });
         }
 
         return bal;
