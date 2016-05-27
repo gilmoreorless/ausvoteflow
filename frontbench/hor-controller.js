@@ -14,7 +14,7 @@
     var steps = {
         // Initial state - fade in candidates one-by-one
         s1() {
-            ballot
+            return ballot
                 .withCard(false)
                 .fadeInCandidates()
                 .duration(1000)
@@ -24,12 +24,12 @@
 
         // Shuffle the order of candidates
         s2() {
-            ballot.randomise(2).render()
+            return ballot.randomise(3).render()
         },
 
         // Re-position candidates to account for ballot card
         s3() {
-            ballot
+            return ballot
                 .withCard(true)
                 .showCard(false)
                 .delay(0)
@@ -38,7 +38,7 @@
 
         // Show the full ballot card
         s4() {
-            ballot
+            return ballot
                 .showCard(true)
                 .fadeInCard()
                 .duration(500)
@@ -47,7 +47,7 @@
 
         // Add some votes
         s5() {
-            ballot
+            return ballot
                 .fadeInVotes()
                 .duration(1000)
                 .delay(400)
@@ -56,31 +56,25 @@
         },
 
         test() {
-            console.log('render: candidates with no card')
-            ballot.withCard(false)
-                .duration(0).delay(0)
-                .render()
-            .then(pause(500))
-            .then(() => {
-                console.log('render: candidates positioned for card')
-                return ballot.withCard(true)
-                    .duration(500)
-                    .render()
-            }).then(pause(1000))
-            .then(() => {
-                console.log('render: card details')
-                return ballot.showCard(true)
-                    .duration(500)
-                    .fadeInCard()
-                    .render()
-            }).then(pause(1000))
-            .then(() => {
-                console.log('render: votes')
-                ballot.fadeInVotes()
-                    .votes([1,2,0,3])
-                    .delay(200)
-                    .render()
-            })
+            function pause(time) {
+                return function () {
+                    return new Promise(function (resolve) {
+                        setTimeout(resolve, time);
+                    });
+                }
+            }
+
+            return [
+                steps.s1,
+                pause(500),
+                steps.s2,
+                pause(1000),
+                steps.s3,
+                pause(1000),
+                steps.s4,
+                pause(1000),
+                steps.s5,
+            ].reduce((prev, cur) => prev.then ? prev.then(cur) : prev())
         }
     };
 
@@ -88,16 +82,5 @@
 
     exports.ballot = ballot;
     exports.bSteps = steps;
-
-/**
- * A simple Promise that just pauses execution for a given amount of milliseconds
- */
-function pause(time) {
-    return function () {
-        return new Promise(function (resolve) {
-            setTimeout(resolve, time);
-        });
-    }
-}
 
 })(this);
