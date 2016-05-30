@@ -37,6 +37,7 @@
             container,
             candidates = [],
             votes = [],
+            title = 'Example ballot card',
             withCard = false,
             showCard = false,
             shouldFadeIn = {
@@ -50,11 +51,13 @@
             nodes = {},
             highlight;
 
+        // Dimension calculations
         const FontSize = 20,
             LineHeight = FontSize * 1.5,
             UnstyledCandidateMargin = FontSize / 2,
             StyledCandidateMargin = LineHeight,
-            VoteBoxWidth = FontSize * 2;
+            VoteBoxWidth = FontSize * 2,
+            HeaderHeight = 60;
 
         /// GETTER / SETTER METHODS
 
@@ -80,12 +83,6 @@
                 let [parent, prop, cssClass] = defs;
                 nodes[prop] = nodes[parent].append('g').attr('class', cssClass);
             });
-            nodes.cardBorder = nodes.cardRoot.append('rect')
-                .attr('class', 'hor-ballot-border')
-                .attr('x', 0)
-                .attr('y', 0)
-                .attr('width', '100%')
-                .attr('height', '100%');
 
             return bal;
         }
@@ -143,7 +140,9 @@
         }
 
         bal.title = function (t) {
-            // TODO: Get/set visible title of ballot paper, like "How to vote for Party ABC"
+            if (!arguments.length) return title;
+            title = t.toString();
+            return bal;
         }
 
         /// WRITE-ONLY METHODS
@@ -172,7 +171,7 @@
         });
 
         bal.highlight = function () {
-            // TODO
+            // TODO: Add a highlight for a single candidate (colour? size?)
         }
 
         function setupNodes() {
@@ -196,6 +195,49 @@
              *             \- number (text)
              */
 
+            // Card border
+            if (!nodes.cardBorder) {
+                nodes.cardBorder = nodes.cardRoot.append('rect')
+                    .attr('class', 'hor-ballot-border')
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('width', '100%')
+                    .attr('height', '100%');
+            }
+
+            // Header (logo, title)
+            if (!nodes.cardTitle) {
+                // Logo
+                nodes.cardHeader.append('rect')
+                    .attr('class', 'hor-ballot-logo')
+                    .attr('x', FontSize / 2)
+                    .attr('y', FontSize / 2)
+                    .attr('width', VoteBoxWidth)
+                    .attr('height', VoteBoxWidth);
+
+                // Title
+                nodes.cardTitle = nodes.cardHeader.append('text')
+                    .attr('class', 'hor-ballot-title')
+                    .attr('x', FontSize + VoteBoxWidth)
+                    .attr('dy', '0.35em')
+                    .attr('y', FontSize * 1.5);
+
+                // Bottom border
+                let borderY = HeaderHeight + 0.5;
+                nodes.cardHeader.append('line')
+                    .attr('class', 'hor-ballot-header-border')
+                    .attr('x1', FontSize / 2)
+                    .attr('x2', '90%')
+                    .attr('y1', borderY)
+                    .attr('y2', borderY);
+
+                // Make sure the other bits clear the header
+                d3.selectAll([nodes.candidatesRoot.node(), nodes.voteBoxesRoot.node()])
+                    .translate(0, HeaderHeight);
+            }
+            nodes.cardTitle.text(title);
+
+            // Candidates (name, party)
             nodes.candidates = nodes.candidatesRoot.selectAll('.hor-candidate')
                 .data(candidates, d => d.name);
             let cgroups = nodes.candidates.enter().append('g')
@@ -208,6 +250,7 @@
                 .attr('dy', '0.35em')
                 .attr('y', LineHeight);
 
+            // Vote boxes (box border, vote text)
             nodes.voteBoxes = nodes.voteBoxesRoot.selectAll('.hor-vote-box')
                 .data(paddedVotes());
             let vgroups = nodes.voteBoxes.enter().append('g')

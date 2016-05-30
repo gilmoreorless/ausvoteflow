@@ -68,11 +68,11 @@
                 steps.s1,
                 pause(500),
                 steps.s2,
-                pause(1000),
+                pause(500),
                 steps.s3,
-                pause(1000),
+                pause(500),
                 steps.s4,
-                pause(1000),
+                pause(200),
                 steps.s5,
             ].reduce((prev, cur) => prev.then ? prev.then(cur) : prev())
         }

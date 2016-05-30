@@ -63,6 +63,14 @@ nav a:hover {
     stroke: #000;
     stroke-width: 2;
 }
+.hor-ballot-title {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+.hor-ballot-header-border {
+    stroke: #333;
+    stroke-dasharray: 2 3;
+}
 .hor-vote-box-border {
     fill: none;
     stroke: #000;
