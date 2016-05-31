@@ -13,46 +13,82 @@
 
     var steps = {
         // Initial state - fade in candidates one-by-one
-        s1() {
-            return ballot
-                .withCard(false)
-                .fadeInCandidates()
-                .duration(1000)
-                .delay(100)
-                .render()
+        s1: {
+            setup() {
+                ballot.withCard(false);
+            },
+            run() {
+                ballot
+                    .fadeInCandidates()
+                    .duration(1000)
+                    .delay(100);
+            }
         },
 
         // Shuffle the order of candidates
-        s2() {
-            return ballot.randomise(3).render()
+        s2: {
+            setup() {
+                ballot.withCard(false);
+            },
+            run() {
+                ballot
+                    .randomise(3)
+                    .duration(1000);
+            }
         },
 
         // Re-position candidates to account for ballot card
-        s3() {
-            return ballot
-                .withCard(true)
-                .showCard(false)
-                .delay(0)
-                .render()
+        s3: {
+            run() {
+                ballot
+                    .withCard(true)
+                    .showCard(false)
+                    .duration(1000);
+            }
         },
 
         // Show the full ballot card
-        s4() {
-            return ballot
-                .showCard(true)
-                .fadeInCard()
-                .duration(500)
-                .render()
+        s4: {
+            setup() {
+                ballot
+                    .showCard(false)
+                    .votes([0, 0, 0, 0]);
+            },
+            run() {
+                ballot
+                    .showCard(true)
+                    .fadeInCard()
+                    .duration(500);
+            }
         },
 
         // Add some votes
-        s5() {
-            return ballot
-                .fadeInVotes()
-                .duration(1000)
-                .delay(400)
-                .votes([2, 1, 4, 3])
-                .render()
+        s5: {
+            setup() {
+                ballot.showCard(true);
+            },
+            run() {
+                ballot
+                    .fadeInVotes()
+                    .duration(1000)
+                    .delay(400)
+                    .votes([2, 1, 4, 3]);
+            }
+        },
+
+        run(s) {
+            let key = 's' + s;
+            let step = steps[key];
+            if (step) {
+                ballot.duration(0).delay(0);
+                if (step.setup) {
+                    step.setup();
+                }
+                return ballot.render().then(function () {
+                    step.run();
+                    return ballot.render();
+                });
+            }
         },
 
         test() {
@@ -65,22 +101,22 @@
             }
 
             return [
-                steps.s1,
+                steps.run.bind(steps, 1),
                 pause(500),
-                steps.s2,
+                steps.run.bind(steps, 2),
                 pause(500),
-                steps.s3,
+                steps.run.bind(steps, 3),
                 pause(500),
-                steps.s4,
+                steps.run.bind(steps, 4),
                 pause(200),
-                steps.s5,
+                steps.run.bind(steps, 5),
             ].reduce((prev, cur) => prev.then ? prev.then(cur) : prev())
         }
     };
 
-    steps.test();
+    steps.run(4);
 
     exports.ballot = ballot;
-    exports.bSteps = steps;
+    exports.bsteps = steps;
 
 })(this);
