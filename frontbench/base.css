@@ -4,7 +4,7 @@ body {
     line-height: 1.5;
     margin: 0;
 }
-header {
+.top-header {
     background-color: #CF8E23;
     color: white;
     font-size: 1.25rem;
@@ -32,7 +32,7 @@ h1 small {
     padding-left: 1em;
 }
 
-/* TEMP */
+/* TEMP - Main nav */
 nav ul {
     display: flex;
     margin: 0;
@@ -58,6 +58,7 @@ nav a:hover {
 
 /*** House of Reps: Ballot card ***/
 
+/*
 .hor-ballot-border {
     fill: none;
     stroke: #000;
@@ -79,4 +80,66 @@ nav a:hover {
 .hor-vote-box-text {
     font-size: 30px;
     font-family: fantasy, cursive;
+}
+*/
+
+/* Non-SVG card stuff */
+figure {
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+.hor-ballot-card {
+    border: 1px solid #333;
+    padding: 1rem 1rem 2rem 1rem;
+}
+.hor-ballot-header {
+    align-items: center;
+    border-bottom: 1px dashed #333;
+    display: flex;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+.hor-ballot-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 0 0 0 1rem;
+}
+
+.hor-candidates,
+.hor-vote-boxes {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.hor-candidates {
+    position: absolute;
+    bottom: 1rem;
+    left: 4.5rem;
+}
+.hor-candidate {
+    font-size: 1.25rem;
+    line-height: 1.5;
+}
+.hor-candidate + .hor-candidate {
+    margin-top: 0.5rem;
+}
+.hor-candidate-name,
+.hor-candidate-party {
+    display: block;
+}
+
+.hor-vote-box + .hor-vote-box {
+    margin-top: 1.75rem;
+}
+.hor-vote-box-text {
+    border: 2px solid #333;
+    box-sizing: border-box;
+    display: block;
+    font-size: 2em;
+    font-family: fantasy, cursive;
+    height: 2.5rem;
+    line-height: 2.5rem;
+    text-align: center;
+    width: 2.5rem;
 }

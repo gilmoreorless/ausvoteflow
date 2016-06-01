@@ -64,24 +64,23 @@
         bal.container = function (elem) {
             if (!arguments.length) return container;
             container = d3.select(elem);
-            nodes.root = container.append('svg')
+            nodes.root = container.append('figure')
                 .attr('class', 'hor-ballot')
-                .attr('width', '100%')
-                .attr('height', 500)
-            let style = d3.select('#hor-style');
-            if (!style.size()) {
-                style = nodes.root.append('style').attr('id', 'hor-style');
-            }
-            style.text(`.hor-candidate { font-size: ${FontSize}px; }`);
+                .attr('width', '100%');
+            // let style = d3.select('#hor-style');
+            // if (!style.size()) {
+            //     style = nodes.root.append('style').attr('id', 'hor-style');
+            // }
+            // style.text(`.hor-candidate { font-size: ${FontSize}px; }`);
 
             [
-                ['root', 'candidatesRoot', 'hor-candidates'],
-                ['root', 'cardRoot', 'hor-ballot-card'],
-                ['cardRoot', 'cardHeader', 'hor-ballot-header'],
-                ['cardRoot', 'voteBoxesRoot', 'hor-vote-boxes'],
+                ['root', 'cardRoot', 'div', 'hor-ballot-card'],
+                ['cardRoot', 'cardHeader', 'header', 'hor-ballot-header'],
+                ['cardRoot', 'voteBoxesRoot', 'ul', 'hor-vote-boxes'],
+                ['root', 'candidatesRoot', 'ul', 'hor-candidates'],
             ].forEach(defs => {
-                let [parent, prop, cssClass] = defs;
-                nodes[prop] = nodes[parent].append('g').attr('class', cssClass);
+                let [parent, prop, tagName, cssClass] = defs;
+                nodes[prop] = nodes[parent].append(tagName).attr('class', cssClass);
             });
 
             return bal;
@@ -179,94 +178,77 @@
              * LAYOUT:
              *
              * container
-             * \- root (svg)
-             *    |- candidatesRoot (g -> nodes.candidates)
-             *    |  \- candidate (g)
-             *    |     |- name (text)
-             *    |     \- party (text)
-             *    \- cardRoot (g)
-             *       |- border (rect)
-             *       |- header (g)
-             *       |  |- logo (image)
-             *       |  \- title (text)
-             *       \- voteBoxesRoot (g -> nodes.voteBoxes)
-             *          \- voteBox (g)
-             *             |- box (rect)
-             *             \- number (text)
+             * \- root (figure)
+             *    |- cardRoot (div)
+             *    |  |- header (header)
+             *    |  |  |- logo (img)
+             *    |  |  \- title (h1)
+             *    |  \- voteBoxesRoot (ul -> nodes.voteBoxes[])
+             *    |     \- voteBox (li)
+             *    |        \- box/number (input[readonly])
+             *    \- candidatesRoot (ul -> nodes.candidates[])
+             *       \- candidate (li)
+             *          |- name (span)
+             *          \- party (span)
              */
 
             // Card border
-            if (!nodes.cardBorder) {
-                nodes.cardBorder = nodes.cardRoot.append('rect')
-                    .attr('class', 'hor-ballot-border')
-                    .attr('x', 0)
-                    .attr('y', 0)
-                    .attr('width', '100%')
-                    .attr('height', '100%');
-            }
+            // if (!nodes.cardBorder) {
+            //     nodes.cardBorder = nodes.cardRoot.append('rect')
+            //         .attr('class', 'hor-ballot-border')
+            //         .attr('x', 0)
+            //         .attr('y', 0)
+            //         .attr('width', '100%')
+            //         .attr('height', '100%');
+            // }
 
             // Header (logo, title)
             if (!nodes.cardTitle) {
                 // Logo
-                nodes.cardHeader.append('rect')
+                nodes.cardHeader.append('img')
                     .attr('class', 'hor-ballot-logo')
-                    .attr('x', FontSize / 2)
-                    .attr('y', FontSize / 2)
                     .attr('width', VoteBoxWidth)
                     .attr('height', VoteBoxWidth);
 
                 // Title
-                nodes.cardTitle = nodes.cardHeader.append('text')
-                    .attr('class', 'hor-ballot-title')
-                    .attr('x', FontSize + VoteBoxWidth)
-                    .attr('dy', '0.35em')
-                    .attr('y', FontSize * 1.5);
+                nodes.cardTitle = nodes.cardHeader.append('h1')
+                    .attr('class', 'hor-ballot-title');
 
                 // Bottom border
-                let borderY = HeaderHeight + 0.5;
-                nodes.cardHeader.append('line')
-                    .attr('class', 'hor-ballot-header-border')
-                    .attr('x1', FontSize / 2)
-                    .attr('x2', '90%')
-                    .attr('y1', borderY)
-                    .attr('y2', borderY);
+                // let borderY = HeaderHeight + 0.5;
+                // nodes.cardHeader.append('line')
+                //     .attr('class', 'hor-ballot-header-border')
+                //     .attr('x1', FontSize / 2)
+                //     .attr('x2', '90%')
+                //     .attr('y1', borderY)
+                //     .attr('y2', borderY);
 
                 // Make sure the other bits clear the header
-                d3.selectAll([nodes.candidatesRoot.node(), nodes.voteBoxesRoot.node()])
-                    .translate(0, HeaderHeight);
+                // d3.selectAll([nodes.candidatesRoot.node(), nodes.voteBoxesRoot.node()])
+                //     .translate(0, HeaderHeight);
             }
             nodes.cardTitle.text(title);
 
             // Candidates (name, party)
             nodes.candidates = nodes.candidatesRoot.selectAll('.hor-candidate')
                 .data(candidates, d => d.name);
-            let cgroups = nodes.candidates.enter().append('g')
+            let cgroups = nodes.candidates.enter().append('li')
                 .attr('class', 'hor-candidate');
-            cgroups.append('text')
-                .text(d => d.name)
-                .attr('dy', '0.35em');
-            cgroups.append('text')
-                .text(d => d.party)
-                .attr('dy', '0.35em')
-                .attr('y', LineHeight);
+            cgroups.append('span')
+                .attr('class', 'hor-candidate-name')
+                .text(d => d.name);
+            cgroups.append('span')
+                .attr('class', 'hor-candidate-party')
+                .text(d => d.party);
 
             // Vote boxes (box border, vote text)
             nodes.voteBoxes = nodes.voteBoxesRoot.selectAll('.hor-vote-box')
                 .data(paddedVotes());
-            let vgroups = nodes.voteBoxes.enter().append('g')
+            let vgroups = nodes.voteBoxes.enter().append('li')
                 .attr('class', 'hor-vote-box');
-            vgroups.append('rect')
-                .attr('class', 'hor-vote-box-border')
-                .attr('x', 0)
-                .attr('y', 0)
-                .attr('width', VoteBoxWidth)
-                .attr('height', VoteBoxWidth);
-            vgroups.append('text')
+            vgroups.append('input')
                 .attr('class', 'hor-vote-box-text')
-                .attr('x', VoteBoxWidth / 2)
-                .attr('text-anchor', 'middle')
-                .attr('dy', '0.35em')
-                .attr('y', VoteBoxWidth / 2);
+                .attr('readonly', '');
         }
 
         function paddedVotes() {
@@ -284,18 +266,18 @@
         }
 
         function positionNoCard() {
-            this.translate(0, (d, i) =>
-                LineHeight / 2 + (i * LineHeight * 2) + (i * UnstyledCandidateMargin));
+            // this.translate(0, (d, i) =>
+            //     LineHeight / 2 + (i * LineHeight * 2) + (i * UnstyledCandidateMargin));
         }
 
         function positionWithCard() {
-            this.translate(VoteBoxWidth + FontSize, (d, i) =>
-                LineHeight + (i * LineHeight * 2) + (i * StyledCandidateMargin));
+            // this.translate(VoteBoxWidth + FontSize, (d, i) =>
+            //     LineHeight + (i * LineHeight * 2) + (i * StyledCandidateMargin));
         }
 
         function positionVoteBox() {
-            this.translate(FontSize / 2, (d, i) =>
-                LineHeight * .75 + (i * LineHeight * 2) + (i * StyledCandidateMargin));
+            // this.translate(FontSize / 2, (d, i) =>
+            //     LineHeight * .75 + (i * LineHeight * 2) + (i * StyledCandidateMargin));
         }
 
         bal.render = function () {
