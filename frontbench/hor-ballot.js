@@ -65,18 +65,12 @@
             if (!arguments.length) return container;
             container = d3.select(elem);
             nodes.root = container.append('figure')
-                .attr('class', 'hor-ballot')
-                .attr('width', '100%');
-            // let style = d3.select('#hor-style');
-            // if (!style.size()) {
-            //     style = nodes.root.append('style').attr('id', 'hor-style');
-            // }
-            // style.text(`.hor-candidate { font-size: ${FontSize}px; }`);
+                .attr('class', 'hor-ballot');
 
+            // Create generic container elements
             [
-                ['root', 'cardRoot', 'div', 'hor-ballot-card'],
-                ['cardRoot', 'cardHeader', 'header', 'hor-ballot-header'],
-                ['cardRoot', 'voteBoxesRoot', 'ul', 'hor-vote-boxes'],
+                ['root', 'cardBorder', 'div', 'hor-ballot-border'],
+                ['root', 'cardHeader', 'header', 'hor-ballot-header'],
                 ['root', 'candidatesRoot', 'ul', 'hor-candidates'],
             ].forEach(defs => {
                 let [parent, prop, tagName, cssClass] = defs;
@@ -179,28 +173,18 @@
              *
              * container
              * \- root (figure)
-             *    |- cardRoot (div)
-             *    |  |- header (header)
-             *    |  |  |- logo (img)
-             *    |  |  \- title (h1)
-             *    |  \- voteBoxesRoot (ul -> nodes.voteBoxes[])
-             *    |     \- voteBox (li)
-             *    |        \- box/number (input[readonly])
+             *    |- border (div)
+             *    |- header (header)
+             *    |  |- logo (img)
+             *    |  \- title (h1)
              *    \- candidatesRoot (ul -> nodes.candidates[])
-             *       \- candidate (li)
-             *          |- name (span)
-             *          \- party (span)
+             *       \- {nodes.candidates[]}
+             *          \- candidate (li)
+             *             |- voteBox (span)
+             *             |  \- number (span)
+             *             |- name (span)
+             *             \- party (span)
              */
-
-            // Card border
-            // if (!nodes.cardBorder) {
-            //     nodes.cardBorder = nodes.cardRoot.append('rect')
-            //         .attr('class', 'hor-ballot-border')
-            //         .attr('x', 0)
-            //         .attr('y', 0)
-            //         .attr('width', '100%')
-            //         .attr('height', '100%');
-            // }
 
             // Header (logo, title)
             if (!nodes.cardTitle) {
@@ -213,27 +197,18 @@
                 // Title
                 nodes.cardTitle = nodes.cardHeader.append('h1')
                     .attr('class', 'hor-ballot-title');
-
-                // Bottom border
-                // let borderY = HeaderHeight + 0.5;
-                // nodes.cardHeader.append('line')
-                //     .attr('class', 'hor-ballot-header-border')
-                //     .attr('x1', FontSize / 2)
-                //     .attr('x2', '90%')
-                //     .attr('y1', borderY)
-                //     .attr('y2', borderY);
-
-                // Make sure the other bits clear the header
-                // d3.selectAll([nodes.candidatesRoot.node(), nodes.voteBoxesRoot.node()])
-                //     .translate(0, HeaderHeight);
             }
             nodes.cardTitle.text(title);
 
-            // Candidates (name, party)
+            // Candidates (vote box, name, party)
             nodes.candidates = nodes.candidatesRoot.selectAll('.hor-candidate')
                 .data(candidates, d => d.name);
             let cgroups = nodes.candidates.enter().append('li')
                 .attr('class', 'hor-candidate');
+            cgroups.append('span')
+                .attr('class', 'hor-vote-box')
+                .append('span')
+                    .attr('class', 'hor-vote-box-text');
             cgroups.append('span')
                 .attr('class', 'hor-candidate-name')
                 .text(d => d.name);
@@ -242,13 +217,8 @@
                 .text(d => d.party);
 
             // Vote boxes (box border, vote text)
-            nodes.voteBoxes = nodes.voteBoxesRoot.selectAll('.hor-vote-box')
+            nodes.voteBoxes = nodes.candidates.select('.hor-vote-box')
                 .data(paddedVotes());
-            let vgroups = nodes.voteBoxes.enter().append('li')
-                .attr('class', 'hor-vote-box');
-            vgroups.append('input')
-                .attr('class', 'hor-vote-box-text')
-                .attr('readonly', '');
         }
 
         function paddedVotes() {
@@ -283,7 +253,10 @@
         bal.render = function () {
             setupNodes();
             let cands = nodes.candidates;
-            let card = nodes.cardRoot;
+            let cardNodes = d3.selectAll([
+                nodes.cardBorder.node(),
+                nodes.cardHeader.node(),
+            ].concat(nodes.voteBoxes[0]));
             let voteText = nodes.voteBoxes.select('.hor-vote-box-text');
             let positionFn = withCard ? positionWithCard : positionNoCard;
 
@@ -294,8 +267,8 @@
                         .call(positionFn);
                 }
                 if (shouldFadeIn.card) {
-                    card.style('opacity', 0);
-                    card = card.transition();
+                    cardNodes.style('opacity', 0);
+                    cardNodes = cardNodes.transition();
                 }
                 if (shouldFadeIn.votes) {
                     voteText.style('opacity', 0);
@@ -326,7 +299,7 @@
                 }
 
                 // Show/hide voting card and votes as required
-                card.style('opacity', +showCard);
+                cardNodes.style('opacity', +showCard);
 
                 // Clean up fade trackers
                 Object.keys(shouldFadeIn).forEach(prop => shouldFadeIn[prop] = false);
