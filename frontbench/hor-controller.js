@@ -51,6 +51,7 @@
         s4: {
             setup() {
                 ballot
+                    .withCard(true)
                     .showCard(false)
                     .votes([0, 0, 0, 0]);
             },

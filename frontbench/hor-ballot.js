@@ -52,12 +52,8 @@
             highlight;
 
         // Dimension calculations
-        const FontSize = 20,
-            LineHeight = FontSize * 1.5,
-            UnstyledCandidateMargin = FontSize / 2,
-            StyledCandidateMargin = LineHeight,
-            VoteBoxWidth = FontSize * 2,
-            HeaderHeight = 60;
+        const FontSize = 20, // px
+            VoteBoxWidth = FontSize * 2;
 
         /// GETTER / SETTER METHODS
 
@@ -236,18 +232,11 @@
         }
 
         function positionNoCard() {
-            // this.translate(0, (d, i) =>
-            //     LineHeight / 2 + (i * LineHeight * 2) + (i * UnstyledCandidateMargin));
+            this.translate('-3.5rem', (d, i) => ((2 + i) * -1) + 'rem');
         }
 
         function positionWithCard() {
-            // this.translate(VoteBoxWidth + FontSize, (d, i) =>
-            //     LineHeight + (i * LineHeight * 2) + (i * StyledCandidateMargin));
-        }
-
-        function positionVoteBox() {
-            // this.translate(FontSize / 2, (d, i) =>
-            //     LineHeight * .75 + (i * LineHeight * 2) + (i * StyledCandidateMargin));
+            this.translate('0rem', '0rem');
         }
 
         bal.render = function () {
@@ -273,7 +262,6 @@
                 if (shouldFadeIn.votes) {
                     voteText.style('opacity', 0);
                 }
-                nodes.voteBoxes.call(positionVoteBox);
 
                 // Add any per-element delays
                 cands = cands.transition();
