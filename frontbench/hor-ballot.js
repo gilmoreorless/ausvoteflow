@@ -49,10 +49,12 @@
             transitionDuration = 0,
             // Internal references
             nodes = {},
+            shouldReorderCandidates = false,
             highlight;
 
         // Dimension calculations
-        const FontSize = 20, // px
+        const RootFontSize = 16, // px == 1rem
+            FontSize = 20, // px
             VoteBoxWidth = FontSize * 2;
 
         /// GETTER / SETTER METHODS
@@ -148,6 +150,7 @@
                 let changed = candidates.filter((c, i) => c !== orig[i]);
                 hasChangedEnough = changed.length >= minChange;
             }
+            shouldReorderCandidates = true;
             return bal;
         }
 
@@ -231,12 +234,31 @@
             return [...votes];
         }
 
-        function positionNoCard() {
-            this.translate('-3.5rem', (d, i) => ((2 + i) * -1) + 'rem');
+        const CandidatePositionRems = {
+            noCard: [-3.5, (d, i) => ((2 + i) * -1)],
+            withCard: [0, 0]
+        };
+
+        function translateCandidates(position) {
+            return function () {
+                this.translate(...position, 'rem');
+            };
         }
 
-        function positionWithCard() {
-            this.translate('0rem', '0rem');
+        function positionPlusReorder(position) {
+            console.log('re-order', this);
+            let [x, y] = position.map(p => d3.functor(p));
+            let currentNodes = nodes.candidatesRoot.selectAll('.hor-candidate')[0];
+            let existingOffsets = currentNodes.map(function (elem) {
+                return elem.offsetTop / RootFontSize;
+            });
+            console.log(existingOffsets);
+            let newY = function (d, i) {
+                let thisOffset = this.offsetTop / RootFontSize;
+                console.log('newY', this, d, i, thisOffset, existingOffsets[i] - thisOffset)
+                return y.call(this, d, i) + (existingOffsets[i] - thisOffset);
+            };
+            return [x, newY];
         }
 
         bal.render = function () {
@@ -247,7 +269,14 @@
                 nodes.cardHeader.node(),
             ].concat(nodes.voteBoxes[0]));
             let voteText = nodes.voteBoxes.select('.hor-vote-box-text');
-            let positionFn = withCard ? positionWithCard : positionNoCard;
+
+            let position = CandidatePositionRems[withCard ? 'withCard' : 'noCard'];
+            if (shouldReorderCandidates) {
+                position = positionPlusReorder(position);
+            }
+            let positionFn = translateCandidates(position);
+
+            let resolveTime = transitionDuration;
 
             function doStuff() {
                 // Prepare positions/opacity for anything that needs fading in
@@ -269,6 +298,7 @@
                 if (transitionDelay) {
                     cands.delay((d, i) => i * transitionDelay);
                     voteText.delay(d => (d - 1) * transitionDelay);
+                    resolveTime += (cands.size() - 1) * transitionDelay;
                 }
 
                 // Show/move candidates
@@ -288,16 +318,30 @@
 
                 // Show/hide voting card and votes as required
                 cardNodes.style('opacity', +showCard);
-
-                // Clean up fade trackers
-                Object.keys(shouldFadeIn).forEach(prop => shouldFadeIn[prop] = false);
             }
 
             return new Promise(function (resolve) {
                 d3.transition()
                     .duration(transitionDuration)
-                    .each('end', resolve)
-                    .each(doStuff);
+                    .each(doStuff)
+                    .each(function () {
+                        console.log('timeout:', resolveTime)
+                        setTimeout(function () {
+                            // Make sure candidate nodes are in the right place
+                            if (shouldReorderCandidates) {
+                                // Has to be a setTimeout to guarantee running after all the transition stuff is done
+                                let position = CandidatePositionRems[withCard ? 'withCard' : 'noCard'];
+                                console.log('re-order candidate nodes', nodes.candidates, nodes.candidatesRoot.selectAll('.hor-candidate'), position)
+                                nodes.candidates.order().call(translateCandidates(position));
+                            }
+
+                            // Clean up fade/re-order trackers
+                            Object.keys(shouldFadeIn).forEach(prop => shouldFadeIn[prop] = false);
+                            shouldReorderCandidates = false;
+
+                            resolve();
+                        }, resolveTime + 100);
+                    });
             });
         }
 
