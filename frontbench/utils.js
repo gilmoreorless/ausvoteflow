@@ -35,7 +35,7 @@
             unit = unit || 'px';
             let wrap = fn => function (...args) {
                 let result = fn.apply(this, args);
-                return result === 0 || reHasUnit.test(result) ? result : result + unit;
+                return reHasUnit.test(result) ? result : result + unit;
             };
             x = wrap(x);
             y = wrap(y);

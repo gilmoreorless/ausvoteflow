@@ -246,16 +246,13 @@
         }
 
         function positionPlusReorder(position) {
-            console.log('re-order', this);
             let [x, y] = position.map(p => d3.functor(p));
             let currentNodes = nodes.candidatesRoot.selectAll('.hor-candidate')[0];
             let existingOffsets = currentNodes.map(function (elem) {
                 return elem.offsetTop / RootFontSize;
             });
-            console.log(existingOffsets);
             let newY = function (d, i) {
                 let thisOffset = this.offsetTop / RootFontSize;
-                console.log('newY', this, d, i, thisOffset, existingOffsets[i] - thisOffset)
                 return y.call(this, d, i) + (existingOffsets[i] - thisOffset);
             };
             return [x, newY];
@@ -325,13 +322,11 @@
                     .duration(transitionDuration)
                     .each(doStuff)
                     .each(function () {
-                        console.log('timeout:', resolveTime)
                         setTimeout(function () {
                             // Make sure candidate nodes are in the right place
                             if (shouldReorderCandidates) {
                                 // Has to be a setTimeout to guarantee running after all the transition stuff is done
                                 let position = CandidatePositionRems[withCard ? 'withCard' : 'noCard'];
-                                console.log('re-order candidate nodes', nodes.candidates, nodes.candidatesRoot.selectAll('.hor-candidate'), position)
                                 nodes.candidates.order().call(translateCandidates(position));
                             }
 
