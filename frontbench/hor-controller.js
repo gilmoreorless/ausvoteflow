@@ -11,9 +11,16 @@
         .container('#hor-example')
         .candidates(candidates);
 
+    var details = d3.select('#hor-example')
+        .append('div')
+        .attr('class', 'explanation-details');
+
     var steps = {
         // Initial state - fade in candidates one-by-one
         s1: {
+            text: [
+                'We start with a list of nominated candidates.'
+            ],
             setup() {
                 ballot.withCard(false);
             },
@@ -27,6 +34,10 @@
 
         // Shuffle the order of candidates
         s2: {
+            text: [
+                'The candidates are put onto the ballot paper in a random order.',
+                'This randomised ballot draw is performed after the deadline for nominations has passed.'
+            ],
             setup() {
                 ballot.withCard(false);
             },
@@ -39,6 +50,9 @@
 
         // Re-position candidates to account for ballot card
         s3: {
+            text: [
+                'On election day, you will be presented with a green ballot paper for the House of Representatives.'
+            ],
             run() {
                 ballot
                     .withCard(true)
@@ -65,6 +79,9 @@
 
         // Add some votes
         s5: {
+            text: [
+                'To vote, number the boxes. All of them.'
+            ],
             setup() {
                 ballot.showCard(true);
             },
@@ -77,18 +94,38 @@
             }
         },
 
-        run(s) {
-            let key = 's' + s;
+        getText(stepNum) {
+            stepNum = +stepNum || 0;
+            let step;
+            while (stepNum > 0 && (step = steps['s' + stepNum])) {
+                if (step.text) {
+                    return step.text;
+                }
+                stepNum--;
+            }
+            return '';
+        },
+
+        run(stepNum) {
+            let key = 's' + stepNum;
             let step = steps[key];
             if (step) {
                 ballot.duration(0).delay(0);
                 if (step.setup) {
                     step.setup();
                 }
-                return ballot.render().then(function () {
-                    step.run();
-                    return ballot.render();
-                });
+                let text = steps.getText(stepNum);
+                if (text) {
+                    details.html(text.map(t => `<p>${t}</p>`).join(''));
+                }
+                // TODO: Allow jumping directly to steps with a pre-render,
+                //       but for now just assume the steps are run in order.
+                // return ballot.render().then(function () {
+                //     step.run();
+                //     return ballot.render();
+                // });
+                step.run();
+                return ballot.render();
             }
         },
 
@@ -111,11 +148,11 @@
                 steps.run.bind(steps, 4),
                 pause(200),
                 steps.run.bind(steps, 5),
-            ].reduce((prev, cur) => prev.then ? prev.then(cur) : prev())
+            ].reduce((prev, cur) => prev.then(cur), Promise.resolve());
         }
     };
 
-    steps.run(4);
+    steps.test();
 
     exports.ballot = ballot;
     exports.bsteps = steps;
