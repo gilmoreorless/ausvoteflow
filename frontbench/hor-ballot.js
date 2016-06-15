@@ -52,11 +52,6 @@
             shouldReorderCandidates = false,
             highlight;
 
-        // Dimension calculations
-        const RootFontSize = 16, // px == 1rem
-            FontSize = 20, // px
-            VoteBoxWidth = FontSize * 2;
-
         /// GETTER / SETTER METHODS
 
         bal.container = function (elem) {
@@ -189,9 +184,7 @@
             if (!nodes.cardTitle) {
                 // Logo
                 nodes.cardHeader.append('img')
-                    .attr('class', 'hor-ballot-logo')
-                    .attr('width', VoteBoxWidth)
-                    .attr('height', VoteBoxWidth);
+                    .attr('class', 'hor-ballot-logo');
 
                 // Title
                 nodes.cardTitle = nodes.cardHeader.append('h1')
@@ -234,25 +227,26 @@
             return [...votes];
         }
 
-        const CandidatePositionRems = {
-            noCard: [-3.5, (d, i) => ((2 + i) * -1)],
+        const CandidatePositionEms = {
+            noCard: [-2.8, (d, i) => ((2 + i) * -0.8)],
             withCard: [0, 0]
         };
 
         function translateCandidates(position) {
             return function () {
-                this.translate(...position, 'rem');
+                this.translate(...position, 'em');
             };
         }
 
         function positionPlusReorder(position) {
             let [x, y] = position.map(p => d3.functor(p));
             let currentNodes = nodes.candidatesRoot.selectAll('.hor-candidate')[0];
+            let fontSizePixels = parseFloat(getComputedStyle(currentNodes[0]).fontSize) || 16;
             let existingOffsets = currentNodes.map(function (elem) {
-                return elem.offsetTop / RootFontSize;
+                return elem.offsetTop / fontSizePixels;
             });
             let newY = function (d, i) {
-                let thisOffset = this.offsetTop / RootFontSize;
+                let thisOffset = this.offsetTop / fontSizePixels;
                 return y.call(this, d, i) + (existingOffsets[i] - thisOffset);
             };
             return [x, newY];
@@ -267,7 +261,7 @@
             ].concat(nodes.voteBoxes[0]));
             let voteText = nodes.voteBoxes.select('.hor-vote-box-text');
 
-            let position = CandidatePositionRems[withCard ? 'withCard' : 'noCard'];
+            let position = CandidatePositionEms[withCard ? 'withCard' : 'noCard'];
             if (shouldReorderCandidates) {
                 position = positionPlusReorder(position);
             }
@@ -326,7 +320,7 @@
                             // Make sure candidate nodes are in the right place
                             if (shouldReorderCandidates) {
                                 // Has to be a setTimeout to guarantee running after all the transition stuff is done
-                                let position = CandidatePositionRems[withCard ? 'withCard' : 'noCard'];
+                                let position = CandidatePositionEms[withCard ? 'withCard' : 'noCard'];
                                 nodes.candidates.order().call(translateCandidates(position));
                             }
 

@@ -87,8 +87,19 @@ figure {
 }
 .hor-ballot {
     box-sizing: border-box;
-    max-width: 25rem;
+    font-size: 1rem; /* rem for the container, then all children use em */
+    max-width: 25em;
     padding: 1rem 1rem 2rem 1rem;
+}
+@media (max-width: 28rem) {
+    .hor-ballot {
+        font-size: 0.8rem;
+    }
+}
+@media (max-width: 22rem) {
+    .hor-ballot {
+        font-size: 0.7rem;
+    }
 }
 .hor-ballot-border {
     background-color: #EFF7E6;
@@ -98,14 +109,19 @@ figure {
     top: 0;
     right: 0;
     bottom: 0;
+    pointer-events: none;
 }
 .hor-ballot-header {
     align-items: center;
-    border-bottom: 1px dashed #333;
+    border-bottom: 1px solid #BFBFBF;
     display: flex;
     padding-bottom: 1rem;
     margin-bottom: 1rem;
     position: relative;
+}
+.hor-ballot-logo {
+    height: 2.5em;
+    width: 2.5em;
 }
 .hor-ballot-title {
     font-size: 1.5em;
@@ -114,23 +130,23 @@ figure {
 }
 
 .hor-candidates {
+    font-size: 1.25em;
+    line-height: 1.5;
+    list-style: none;
     margin: 0;
     padding: 0;
-    list-style: none;
     position: relative;
 }
 .hor-candidate {
-    font-size: 1.25rem;
-    line-height: 1.5;
     position: relative;
 }
 .hor-candidate + .hor-candidate {
-    margin-top: 1.5rem;
+    margin-top: 1.2em; /* 1.5rem */
 }
 .hor-candidate-name,
 .hor-candidate-party {
     display: block;
-    margin-left: 3.5rem;
+    margin-left: 2.8em; /* 3.5rem */
 }
 .hor-vote-box {
     border: 2px solid #333;
@@ -138,9 +154,9 @@ figure {
     display: block;
     font-size: 1.5em;
     font-family: fantasy, cursive;
-    height: 2.5rem;
+    height: 1.3333333em; /* 2.5rem */
     text-align: center;
-    width: 2.5rem;
+    width: 1.3333333em; /* 2.5rem */
     float: left;
     margin-top: 0.25rem;
 }
