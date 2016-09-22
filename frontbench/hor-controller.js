@@ -15,6 +15,8 @@
         .append('div')
         .attr('class', 'explanation-details');
 
+    var ballotAnimator = animator();
+
     var steps = {
         // Initial state - fade in candidates one-by-one
         s1: {
@@ -181,31 +183,20 @@
         },
 
         test() {
-            function pause(time) {
-                return function () {
-                    return new Promise(function (resolve) {
-                        setTimeout(resolve, time);
-                    });
-                }
-            }
-
-            return [
-                steps.run.bind(steps, 1),
-                pause(500),
-                steps.run.bind(steps, 2),
-                pause(500),
-                steps.run.bind(steps, 3),
-                pause(500),
-                steps.run.bind(steps, 4),
-                pause(200),
+            ballotAnimator.steps([
                 steps.run.bind(steps, 5),
-            ].reduce((prev, cur) => prev.then(cur), Promise.resolve());
+                steps.run.bind(steps, 6),
+                steps.run.bind(steps, 7),
+                steps.run.bind(steps, 8),
+            ]).play();
         }
     };
 
     steps.test();
 
+    // TEMPORARY: For console testing only
     exports.ballot = ballot;
     exports.bsteps = steps;
+    exports.banimator = ballotAnimator;
 
 })(this);

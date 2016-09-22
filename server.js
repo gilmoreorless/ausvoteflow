@@ -37,7 +37,7 @@ setupDumbPaths({
         children: {
             'house-of-reps': {
                 title: 'House of Representatives',
-                scripts: ['utils.js', 'hor-ballot.js', 'hor-dop.js', 'hor-controller.js'],
+                scripts: ['utils.js', 'animator.js', 'hor-ballot.js', 'hor-dop.js', 'hor-controller.js'],
             },
             'senate': {
                 title: 'Senate',
