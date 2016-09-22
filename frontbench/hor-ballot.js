@@ -1,9 +1,6 @@
 /* global utils, d3 */
 (function (exports) {
 
-    /**
-     * TODO: Switch to a D3-style chained API for everything. Get rid of "modes".
-     */
     /*** EXAMPLE ***\/
     let card = ballot.container('#example')
       // First state
@@ -75,13 +72,13 @@
 
         bal.candidates = function (c) {
             if (!arguments.length) return candidates;
-            candidates = Array.from(c);
+            candidates = [].concat(c);
             return bal;
         }
 
         bal.votes = function (v) {
             if (!arguments.length) return votes;
-            votes = Array.from(v);
+            votes = [].concat(v);
             return bal;
         }
 
