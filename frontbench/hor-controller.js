@@ -1,10 +1,10 @@
 (function (exports) {
 
     var candidates = [
-        {name: 'Scarlet PIMPERNEL', party: 'Reds'},
-        {name: 'Clover FIELDS', party: 'Greens'},
-        {name: 'Ebony SCHWARTZ', party: 'Blacks'},
-        {name: 'Blanche ALMOND', party: 'Whites'}
+        {name: 'PIMPERNEL, Scarlet', party: 'Reds'},
+        {name: 'FIELDS, Clover', party: 'Greens'},
+        {name: 'SCHWARTZ, Ebony', party: 'Blacks'},
+        {name: 'ALMOND, Blanche', party: 'Whites'}
     ];
 
     var ballot = horBallot()
@@ -91,6 +91,57 @@
                     .duration(1000)
                     .delay(400)
                     .votes([2, 1, 4, 3]);
+            }
+        },
+
+        // Invalid votes — not all boxes numbered
+        s6: {
+            text: [
+                'This is wrong. What are you doing?'
+            ],
+            setup() {
+                ballot.showCard(true);
+            },
+            run() {
+                ballot
+                    .fadeInVotes()
+                    .duration(1000)
+                    .delay(100)
+                    .votes([0, 1, 2, 0]);
+            }
+        },
+
+        // Invalid votes — wrong numbers
+        s7: {
+            text: [
+                'This is also wrong. Do you know how counting works?'
+            ],
+            setup() {
+                ballot.showCard(true);
+            },
+            run() {
+                ballot
+                    .fadeInVotes()
+                    .duration(1000)
+                    .delay(100)
+                    .votes([5, 3, 1, 7]);
+            }
+        },
+
+        // Donkey vote
+        s8: {
+            text: [
+                'A so-called “Donkey Vote”. It’s not invalid, just silly.'
+            ],
+            setup() {
+                ballot.showCard(true);
+            },
+            run() {
+                ballot
+                    .fadeInVotes()
+                    .duration(1000)
+                    .delay(100)
+                    .votes([1, 2, 3, 4]);
             }
         },
 

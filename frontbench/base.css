@@ -64,7 +64,7 @@ nav a:hover {
     padding: 0 1rem 0 2.5rem;
     position: relative;
 }
-.explanation-details::before {
+.explanation-details:before {
     background-color: hsl(240, 30%, 40%);
     border-radius: 50%;
     content: 'i';
@@ -76,6 +76,9 @@ nav a:hover {
     text-align: center;
     left: 0.5rem;
     top: 1rem;
+}
+.explanation-details:empty {
+    display: none;
 }
 
 /*** House of Reps: Ballot card ***/
