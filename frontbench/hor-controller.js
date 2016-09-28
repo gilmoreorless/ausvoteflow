@@ -21,7 +21,7 @@
         // Initial state - fade in candidates one-by-one
         s1: {
             text: [
-                'We start with a list of nominated candidates.'
+                'We start with a list of nominated candidates for an electorate.'
             ],
             setup() {
                 ballot.withCard(false);
@@ -38,7 +38,7 @@
         s2: {
             text: [
                 'The candidates are put onto the ballot paper in a random order.',
-                'This randomised ballot draw is performed after the deadline for nominations has passed.'
+                'This randomised ballot draw is performed after nominations are no longer accepted.'
             ],
             setup() {
                 ballot.withCard(false);
@@ -82,7 +82,8 @@
         // Add some votes
         s5: {
             text: [
-                'To vote, number the boxes. All of them.'
+                'To vote, number all the boxes in order — in this case, from 1 to 4.',
+                'You must number <em>all</em> the boxes correctly for your vote to count.'
             ],
             setup() {
                 ballot.showCard(true);
@@ -99,7 +100,11 @@
         // Invalid votes — not all boxes numbered
         s6: {
             text: [
-                'This is wrong. What are you doing?'
+                'This is an invalid vote (also known as an informal vote).',
+                'Although the numbers are in the right order, not all the boxes have been filled in,' +
+                ' so this vote will not be counted.',
+                'In some Australian state elections, this would be enough, but for a Federal (i.e. Australia-wide)' +
+                ' election you need to fill in <em>all</em> the boxes.'
             ],
             setup() {
                 ballot.showCard(true);
@@ -116,7 +121,10 @@
         // Invalid votes — wrong numbers
         s7: {
             text: [
-                'This is also wrong. Do you know how counting works?'
+                'This is also an invalid (informal) vote.',
+                'All the boxes have been filled in, but the numbers are not counting up correctly from 1 to 4.',
+                'It’s important to always double-check your vote to make sure you’ve filled it in correctly.',
+                'If you do make a mistake, you can always ask for a new ballot paper to try again.'
             ],
             setup() {
                 ballot.showCard(true);
@@ -133,7 +141,15 @@
         // Donkey vote
         s8: {
             text: [
-                'A so-called “Donkey Vote”. It’s not invalid, just silly.'
+                'A so-called “Donkey Vote” where the boxes are numbered in order from top to bottom.',
+                'This is still counted as a valid vote, but is often a pattern used by voters who' +
+                ' don’t care where their vote goes. There will be voters who genuinely want to direct' +
+                ' their preferences this way, but it’s impossible to distinguish their votes from those' +
+                ' who just number the boxes from top to bottom to get the voting process out of the way.',
+                'The prevalence of “Donkey” voting results in candidates hoping to get the top ballot position' +
+                ' in the random ballot draw, effectively giving them some “free” votes that they wouldn’t usually receive.',
+                'TODO: LOOK UP THE ORIGIN OF THE TERM "DONKEY VOTE"',
+                'TODO: FIND STATISTIC ANALYSIS OF DONKEY VOTING. DOES IT HAPPEN IN COUNTRIES WITHOUT COMPULSORY VOTING?'
             ],
             setup() {
                 ballot.showCard(true);
@@ -184,6 +200,13 @@
 
         test() {
             ballotAnimator.steps([
+                steps.run.bind(steps, 1),
+                steps.run.bind(steps, 2),
+                {
+                    delay: 0,
+                    run: steps.run.bind(steps, 3)
+                },
+                steps.run.bind(steps, 4),
                 steps.run.bind(steps, 5),
                 steps.run.bind(steps, 6),
                 steps.run.bind(steps, 7),
